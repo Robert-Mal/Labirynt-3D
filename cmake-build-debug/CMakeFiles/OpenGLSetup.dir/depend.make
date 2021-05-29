@@ -111,6 +111,7 @@ CMakeFiles/OpenGLSetup.dir/main.cpp.obj: ../glm/include/glm/vec4.hpp
 CMakeFiles/OpenGLSetup.dir/main.cpp.obj: ../glm/include/glm/vector_relational.hpp
 CMakeFiles/OpenGLSetup.dir/main.cpp.obj: ../camera.h
 CMakeFiles/OpenGLSetup.dir/main.cpp.obj: ../main.cpp
+CMakeFiles/OpenGLSetup.dir/main.cpp.obj: ../maze_generator.h
 CMakeFiles/OpenGLSetup.dir/main.cpp.obj: ../shader.h
 CMakeFiles/OpenGLSetup.dir/main.cpp.obj: ../stb_image.h
 

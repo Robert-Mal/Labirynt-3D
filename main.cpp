@@ -9,6 +9,7 @@
 #include "camera.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "maze_generator.h"
 
 #include <random>
 
@@ -24,7 +25,8 @@ unsigned int loadCubemap(std::vector<std::string> faces);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Maze_generator maze;
+Camera camera(maze);
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -240,17 +242,6 @@ int main()
     wallShader.setInt("diffuseMap", 0);
     wallShader.setInt("normalMap", 1);
 
-    const int N = 7;
-    int field[N][N] = {
-            {1,1,1,0,1,1,1},
-            {1,0,0,0,0,0,1},
-            {1,1,1,1,1,0,1},
-            {1,0,1,0,0,0,1},
-            {1,0,1,0,1,0,1},
-            {1,0,0,0,1,0,1},
-            {1,1,1,1,1,1,1}
-    };
-
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
@@ -293,9 +284,9 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, floorNormalMap);
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (field[i][j] == 0) {
+        for (int i = 0; i < maze.SIZE; i++) {
+            for (int j = 0; j < maze.SIZE; j++) {
+                if (maze.Level[i][j].display == ' ' || maze.Level[i][j].display == 'S') {
                     model = glm::mat4(1.0f);
                     model = glm::translate(model, glm::vec3(i + 0.0f, 0.0f, j + 0.0f));
                     floorShader.setMat4("model", model);
@@ -325,7 +316,6 @@ int main()
         wallShader.setFloat("light.linear", 0.09f);
         wallShader.setFloat("light.quadratic", 0.032f);
 
-        floorShader.use();
         glBindVertexArray(wallVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, wallDiffuseMap);
@@ -333,12 +323,12 @@ int main()
         glBindTexture(GL_TEXTURE_2D, wallNormalMap);
         glActiveTexture(GL_TEXTURE0);
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (field[i][j] == 1) {
+        for (int i = 0; i < maze.SIZE; i++) {
+            for (int j = 0; j < maze.SIZE; j++) {
+                if (maze.Level[i][j].display == '*') {
                     model = glm::mat4(1.0f);
                     model = glm::translate(model, glm::vec3(i + 0.0f, 0.0f, j + 0.0f));
-                    floorShader.setMat4("model", model);
+                    wallShader.setMat4("model", model);
                     glDrawArrays(GL_TRIANGLES, 0, 36);
                 }
             }
@@ -385,6 +375,14 @@ void processInput(GLFWwindow* window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        if (camera.FlyMode == false) {
+            camera.returnPosition = camera.Position;
+        } else {
+            camera.Position = camera.returnPosition;
+        }
+        camera.FlyMode = !camera.FlyMode;
+    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)

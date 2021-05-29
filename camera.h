@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <vector>
+#include "maze_generator.h"
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
@@ -18,7 +19,7 @@ enum Camera_Movement {
 // Default camera values
 const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
-const float SPEED       =  2.5f;
+const float SPEED       =  2.0f;
 const float SENSITIVITY =  0.05f;
 const float ZOOM        =  45.0f;
 
@@ -41,10 +42,21 @@ public:
     float MouseSensitivity;
     float Zoom;
 
+    bool FlyMode = false;
+    glm::vec3 returnPosition;
+    Maze_generator Maze;
+
     // constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(Maze_generator maze, glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
-        Position = position;
+        for (int i = 0; i < maze.SIZE; i++) {
+            for (int j = 0; j < maze.SIZE; j++) {
+                if (maze.Level[i][j].display == 'S') {
+                    Position = glm::vec3(i + 0.0f, 0.0f, j + 0.0f);
+                }
+            }
+        }
+        Maze = maze;
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
@@ -78,6 +90,10 @@ public:
             Position -= Right * velocity;
         if (direction == RIGHT)
             Position += Right * velocity;
+
+        if(!FlyMode) {
+            Position[1] = 0.0f;
+        }
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.

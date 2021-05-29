@@ -1,0 +1,3 @@
+"C:\Program Files\JetBrains\CLion 2020.2.3\bin\cmake\win\bin\cmake.exe" -E rm -f CMakeFiles\zlib.dir/objects.a
+C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\ar.exe cr CMakeFiles\zlib.dir/objects.a @CMakeFiles\zlib.dir\objects1.rsp
+C:\PROGRA~1\MINGW-~1\X86_64~1.0-P\mingw64\bin\gcc.exe  -fno-strict-aliasing -fPIC  -g  -shared -o ..\..\..\..\build\libzlibd.dll -Wl,--out-implib,libzlibd.dll.a -Wl,--major-image-version,0,--minor-image-version,0 -Wl,--whole-archive CMakeFiles\zlib.dir/objects.a -Wl,--no-whole-archive @CMakeFiles\zlib.dir\linklibs.rsp

@@ -1,0 +1,11 @@
+prefix=C:/Program Files (x86)/OpenGLSetup
+exec_prefix=C:/Program Files (x86)/OpenGLSetup/
+libdir=C:/Program Files (x86)/OpenGLSetup/lib
+includedir=C:/Program Files (x86)/OpenGLSetup/../include/include
+
+Name: OpenGLSetup
+Description: Import various well-known 3D model formats in an uniform manner.
+Version: 5.0.0
+Libs: -L${libdir} -lassimp
+Libs.private:  
+Cflags: -I${includedir}

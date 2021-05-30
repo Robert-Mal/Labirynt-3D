@@ -21,6 +21,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
 unsigned int loadCubemap(std::vector<std::string> faces);
+bool isWon(glm::vec3 position);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -41,7 +42,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Labirynt 3D", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to  create GLFW window" << std::endl;
@@ -66,6 +67,7 @@ int main()
     Shader skyboxShader("shaders/vertex1.glsl", "shaders/frag1.glsl");
     Shader floorShader("shaders/wall_vertex.glsl", "shaders/wall_frag.glsl");
     Shader wallShader("shaders/wall_vertex.glsl", "shaders/wall_frag.glsl");
+    Shader trapdoorShader("shaders/wall_vertex.glsl", "shaders/wall_frag.glsl");
 
     float skyboxVertices[] = {
             // positions
@@ -242,8 +244,21 @@ int main()
     wallShader.setInt("diffuseMap", 0);
     wallShader.setInt("normalMap", 1);
 
+    unsigned int trapdoorDiffuseMap = loadTexture("resources/textures/trapdoor/albedo.jpg");
+    unsigned int trapdoorNormalMap = loadTexture("resources/textures/trapdoor/normal.jpg");
+
+    trapdoorShader.use();
+    trapdoorShader.setInt("diffuseMap", 0);
+    trapdoorShader.setInt("normalMap", 1);
+
     while (!glfwWindowShouldClose(window))
     {
+        if (isWon(camera.Position))
+        {
+            std::cout << "WYGRANA" << std::endl;
+            glfwSetWindowShouldClose(window, 1);
+        }
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -326,6 +341,24 @@ int main()
         for (int i = 0; i < maze.SIZE; i++) {
             for (int j = 0; j < maze.SIZE; j++) {
                 if (maze.Level[i][j].display == '*') {
+                    model = glm::mat4(1.0f);
+                    model = glm::translate(model, glm::vec3(i + 0.0f, 0.0f, j + 0.0f));
+                    wallShader.setMat4("model", model);
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
+                }
+            }
+        }
+
+        glBindVertexArray(floorVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, trapdoorDiffuseMap);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, trapdoorNormalMap);
+        glActiveTexture(GL_TEXTURE0);
+
+        for (int i = 0; i < maze.SIZE; i++) {
+            for (int j = 0; j < maze.SIZE; j++) {
+                if (maze.Level[i][j].display == 'E') {
                     model = glm::mat4(1.0f);
                     model = glm::translate(model, glm::vec3(i + 0.0f, 0.0f, j + 0.0f));
                     wallShader.setMat4("model", model);
@@ -478,4 +511,14 @@ unsigned int loadCubemap(std::vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     return textureID;
+}
+
+bool isWon(glm::vec3 position)
+{
+    int y = floor(position[0] + 0.5);
+    int x = floor(position[2] + 0.5);
+
+    if (maze.Level[y][x].display == 'E') { return true; }
+
+    return false;
 }

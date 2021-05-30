@@ -21,6 +21,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
 unsigned int loadCubemap(std::vector<std::string> faces);
+bool isWon(glm::vec3 position);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -242,8 +243,17 @@ int main()
     wallShader.setInt("diffuseMap", 0);
     wallShader.setInt("normalMap", 1);
 
+	glEnable(GL_DEPTH_TEST);
+
     while (!glfwWindowShouldClose(window))
     {
+		glm::vec3 position = camera.getPosition();
+		if (isWon(position))
+		{
+			std::cout << "WYGRANA" << std::endl;
+			glfwSetWindowShouldClose(window, 1);
+		}
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -478,4 +488,14 @@ unsigned int loadCubemap(std::vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     return textureID;
+}
+
+bool isWon(glm::vec3 position)
+{
+	int y = floor(position[0] + 0.5);
+	int x = floor(position[2] + 0.5);
+
+	if (maze.Level[y][x].display == 'E') { return true; }
+	return false;
+
 }

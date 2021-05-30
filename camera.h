@@ -78,23 +78,72 @@ public:
         return glm::lookAt(Position, Position + Front, Up);
     }
 
+	// POZYCJA KAMERY
+	glm::vec3 getPosition() 
+	{
+		return Position;
+	}
+
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
         float velocity = MovementSpeed * deltaTime;
+		glm::vec3 newPos = Position;
         if (direction == FORWARD)
-            Position += Front * velocity;
+            newPos += Front * velocity;
         if (direction == BACKWARD)
-            Position -= Front * velocity;
+            newPos -= Front * velocity;
         if (direction == LEFT)
-            Position -= Right * velocity;
+            newPos -= Right * velocity;
         if (direction == RIGHT)
-            Position += Right * velocity;
+            newPos += Right * velocity;
 
         if(!FlyMode) {
-            Position[1] = 0.0f;
+            newPos[1] = 0.0f;
         }
+
+		if (isCollision(newPos))
+		{
+			std::cout << "Kolizja" << std::endl;
+		}
+		else {
+			Position = newPos;
+		}
     }
+
+	bool isCollision(glm::vec3 position)
+	{
+		// CENTER
+		float Cent_y = position[0] + 0.5;
+		float Cent_x = position[2] + 0.5;
+
+		int x;
+		int y;
+
+
+		// GORA PRAWO
+		y = floor(Cent_y + 0.15);
+		x = floor(Cent_x + 0.15);
+		if (Maze.Level[y][x].display == '*') { return true; }
+
+		// DOL PRAWO
+		y = floor(Cent_y - 0.15);
+		x = floor(Cent_x + 0.15);
+		if (Maze.Level[y][x].display == '*') { return true; }
+
+		// GORA LEWO
+		y = floor(Cent_y + 0.15);
+		x = floor(Cent_x - 0.15);
+		if (Maze.Level[y][x].display == '*') { return true; }
+
+		// DOL LEWO
+		y = floor(Cent_y - 0.15);
+		x = floor(Cent_x - 0.15);
+		if (Maze.Level[y][x].display == '*') { return true; }
+
+		return false;
+
+	}
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
